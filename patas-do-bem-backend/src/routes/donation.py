@@ -14,15 +14,39 @@ def create_donation():
         # Validar dados obrigatórios
         required_fields = ['donor_name', 'donor_email', 'amount', 'donation_type', 'payment_method']
         for field in required_fields:
-            if field not in data:
+            if field not in data or not data[field]:
                 return jsonify({'error': f'Campo {field} é obrigatório'}), 400
+        
+        # Validar email
+        import re
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, data['donor_email']):
+            return jsonify({'error': 'Formato de email inválido'}), 400
+        
+        # Validar valor positivo
+        try:
+            amount = float(data['amount'])
+            if amount <= 0:
+                return jsonify({'error': 'Valor deve ser positivo'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Valor inválido'}), 400
+        
+        # Validar tipo de doação
+        valid_types = ['one_time', 'recurring']
+        if data['donation_type'] not in valid_types:
+            return jsonify({'error': 'Tipo de doação inválido'}), 400
+        
+        # Validar método de pagamento
+        valid_methods = ['pix', 'credit_card', 'boleto']
+        if data['payment_method'] not in valid_methods:
+            return jsonify({'error': 'Método de pagamento inválido'}), 400
         
         # Criar nova doação
         donation = Donation(
             donor_name=data['donor_name'],
             donor_email=data['donor_email'],
             donor_phone=data.get('donor_phone'),
-            amount=data['amount'],
+            amount=amount,
             donation_type=data['donation_type'],
             payment_method=data['payment_method'],
             payment_status='pending'
@@ -58,16 +82,20 @@ def list_donations():
     """Listar doações (área administrativa)"""
     try:
         page = request.args.get('page', 1, type=int)
-        limit = request.args.get('limit', 20, type=int)
+        per_page = request.args.get('per_page', request.args.get('limit', 20), type=int)
         status = request.args.get('status', 'all')
+        donation_type = request.args.get('type', 'all')
         
         query = Donation.query
         
         if status != 'all':
             query = query.filter(Donation.payment_status == status)
         
+        if donation_type != 'all':
+            query = query.filter(Donation.donation_type == donation_type)
+        
         donations = query.order_by(Donation.created_at.desc()).paginate(
-            page=page, per_page=limit, error_out=False
+            page=page, per_page=per_page, error_out=False
         )
         
         return jsonify({
@@ -134,6 +162,58 @@ def confirm_payment(donation_id):
         db.session.commit()
         
         return jsonify({'message': 'Pagamento confirmado', 'donation': donation.to_dict()})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@donation_bp.route('/donations/history', methods=['GET'])
+def donation_history():
+    """Histórico público de doações (anonimizado)"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 10, type=int)
+        
+        donations = Donation.query.filter(
+            Donation.payment_status == 'completed'
+        ).order_by(Donation.created_at.desc()).paginate(
+            page=page, per_page=limit, error_out=False
+        )
+        
+        # Anonimizar dados para exibição pública
+        history = []
+        for donation in donations.items:
+            history.append({
+                'amount': float(donation.amount),
+                'donation_type': donation.donation_type,
+                'date': donation.created_at.isoformat(),
+                'donor_name': donation.donor_name[0] + '***' if donation.donor_name else 'Anônimo'
+            })
+        
+        return jsonify({
+            'donations': history,
+            'total': donations.total,
+            'pages': donations.pages,
+            'current_page': page
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@donation_bp.route('/donations/<int:donation_id>/cancel', methods=['PUT'])
+def cancel_donation(donation_id):
+    """Cancelar doação"""
+    try:
+        donation = Donation.query.get_or_404(donation_id)
+        
+        if donation.payment_status in ['completed', 'cancelled']:
+            return jsonify({'error': 'Não é possível cancelar esta doação'}), 400
+        
+        donation.payment_status = 'cancelled'
+        donation.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({'message': 'Doação cancelada com sucesso'})
         
     except Exception as e:
         db.session.rollback()

@@ -12,6 +12,10 @@ class Raffle(db.Model):
     total_numbers = db.Column(db.Integer, nullable=False)
     draw_date = db.Column(db.Date)
     status = db.Column(db.String(20), default='active')  # 'active', 'completed', 'cancelled'
+    winner_number = db.Column(db.Integer)
+    winner_name = db.Column(db.String(100))
+    winner_email = db.Column(db.String(100))
+    drawn_at = db.Column(db.DateTime)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -32,6 +36,10 @@ class Raffle(db.Model):
             'total_numbers': self.total_numbers,
             'draw_date': self.draw_date.isoformat() if self.draw_date else None,
             'status': self.status,
+            'winner_number': self.winner_number,
+            'winner_name': self.winner_name,
+            'winner_email': self.winner_email,
+            'drawn_at': self.drawn_at.isoformat() if self.drawn_at else None,
             'created_by': self.created_by,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None

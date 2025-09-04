@@ -164,11 +164,10 @@ def get_raffle_tickets(raffle_id):
         return jsonify({'error': str(e)}), 500
 
 @raffle_bp.route('/raffles/<int:raffle_id>/tickets', methods=['POST'])
-def buy_raffle_tickets():
+def buy_raffle_tickets(raffle_id):
     """Comprar números da rifa"""
     try:
         data = request.get_json()
-        raffle_id = request.view_args['raffle_id']
         
         raffle = Raffle.query.get_or_404(raffle_id)
         
@@ -176,12 +175,30 @@ def buy_raffle_tickets():
             return jsonify({'error': 'Rifa não está ativa'}), 400
         
         # Validar dados obrigatórios
-        required_fields = ['buyer_name', 'buyer_email', 'ticket_numbers', 'payment_method']
+        required_fields = ['buyer_name', 'buyer_email', 'selected_numbers', 'payment_method']
         for field in required_fields:
-            if field not in data:
+            if field not in data or not data[field]:
                 return jsonify({'error': f'Campo {field} é obrigatório'}), 400
         
-        ticket_numbers = data['ticket_numbers']
+        # Validar email
+        import re
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, data['buyer_email']):
+            return jsonify({'error': 'Formato de email inválido'}), 400
+        
+        ticket_numbers = data['selected_numbers']
+        
+        # Validar se é uma lista
+        if not isinstance(ticket_numbers, list):
+            return jsonify({'error': 'selected_numbers deve ser uma lista'}), 400
+        
+        # Validar se há números
+        if len(ticket_numbers) == 0:
+            return jsonify({'error': 'Deve selecionar pelo menos um número'}), 400
+        
+        # Validar números duplicados
+        if len(ticket_numbers) != len(set(ticket_numbers)):
+            return jsonify({'error': 'Números duplicados não são permitidos'}), 400
         
         # Verificar se os números estão disponíveis
         existing_tickets = RaffleTicket.query.filter(
@@ -260,5 +277,109 @@ def confirm_ticket_payment(raffle_id):
         
     except Exception as e:
         db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@raffle_bp.route('/raffles/<int:raffle_id>/numbers', methods=['GET'])
+def get_raffle_numbers(raffle_id):
+    """Obter números disponíveis e vendidos da rifa"""
+    try:
+        raffle = Raffle.query.get_or_404(raffle_id)
+        
+        # Números vendidos (pagamentos confirmados)
+        sold_tickets = RaffleTicket.query.filter(
+            RaffleTicket.raffle_id == raffle_id,
+            RaffleTicket.payment_status == 'completed'
+        ).all()
+        
+        # Números reservados (pagamentos pendentes)
+        reserved_tickets = RaffleTicket.query.filter(
+            RaffleTicket.raffle_id == raffle_id,
+            RaffleTicket.payment_status == 'pending'
+        ).all()
+        
+        sold_numbers = [ticket.ticket_number for ticket in sold_tickets]
+        reserved_numbers = [ticket.ticket_number for ticket in reserved_tickets]
+        all_unavailable = set(sold_numbers + reserved_numbers)
+        
+        available_numbers = [i for i in range(1, raffle.total_numbers + 1) if i not in all_unavailable]
+        
+        return jsonify({
+            'available_numbers': available_numbers,
+            'sold_numbers': sold_numbers,
+            'reserved_numbers': reserved_numbers,
+            'total_numbers': raffle.total_numbers
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@raffle_bp.route('/raffles/<int:raffle_id>/draw', methods=['POST'])
+def draw_raffle(raffle_id):
+    """Realizar sorteio da rifa (Admin)"""
+    try:
+        import random
+        
+        raffle = Raffle.query.get_or_404(raffle_id)
+        
+        if raffle.status != 'active':
+            return jsonify({'error': 'Rifa não está ativa para sorteio'}), 400
+        
+        # Obter todos os números vendidos
+        sold_tickets = RaffleTicket.query.filter(
+            RaffleTicket.raffle_id == raffle_id,
+            RaffleTicket.payment_status == 'completed'
+        ).all()
+        
+        if not sold_tickets:
+            return jsonify({'error': 'Nenhum número foi vendido para esta rifa'}), 400
+        
+        # Sortear um número aleatório entre os vendidos
+        winning_ticket = random.choice(sold_tickets)
+        
+        # Atualizar rifa com o resultado
+        raffle.status = 'completed'
+        raffle.winner_number = winning_ticket.ticket_number
+        raffle.winner_name = winning_ticket.buyer_name
+        raffle.winner_email = winning_ticket.buyer_email
+        raffle.drawn_at = datetime.utcnow()
+        raffle.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Sorteio realizado com sucesso',
+            'winner': {
+                'number': winning_ticket.ticket_number,
+                'name': winning_ticket.buyer_name,
+                'email': winning_ticket.buyer_email
+            },
+            'drawn_at': raffle.drawn_at.isoformat()
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@raffle_bp.route('/raffles/<int:raffle_id>/winners', methods=['GET'])
+def get_raffle_winners(raffle_id):
+    """Obter ganhadores da rifa"""
+    try:
+        raffle = Raffle.query.get_or_404(raffle_id)
+        
+        if raffle.status != 'completed' or not raffle.winner_number:
+            return jsonify({'message': 'Rifa ainda não foi sorteada'})
+        
+        winner_data = {
+            'raffle_id': raffle_id,
+            'raffle_title': raffle.title,
+            'winner_number': raffle.winner_number,
+            'winner_name': raffle.winner_name,
+            'drawn_at': raffle.drawn_at.isoformat() if raffle.drawn_at else None,
+            'prize_description': raffle.description
+        }
+        
+        return jsonify({'winner': winner_data})
+        
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
