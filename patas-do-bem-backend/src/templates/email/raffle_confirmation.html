@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Participação na Rifa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #ea580c, #f59e0b);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px 20px;
+            border: 1px solid #ddd;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+        }
+        .raffle-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ea580c;
+        }
+        .numbers {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .number {
+            display: inline-block;
+            background: #ea580c;
+            color: white;
+            padding: 8px 12px;
+            margin: 3px;
+            border-radius: 50%;
+            font-weight: bold;
+            min-width: 30px;
+        }
+        .amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ea580c;
+        }
+        .draw-date {
+            background: #dcfce7;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #16a34a;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎟️ Participação Confirmada!</h1>
+        <p>Boa sorte na rifa!</p>
+    </div>
+    
+    <div class="content">
+        <p>Olá, <strong>{{ buyer_name }}</strong>!</p>
+        
+        <p>Sua participação na rifa foi confirmada com sucesso! Agora é torcer para que a sorte sorria para você. 🍀</p>
+        
+        <div class="raffle-details">
+            <h3>{{ raffle_title }}</h3>
+            
+            <div class="numbers">
+                <h4>Seus números da sorte:</h4>
+                {% for number in ticket_numbers %}
+                <span class="number">{{ "%02d"|format(number) }}</span>
+                {% endfor %}
+            </div>
+            
+            <p><strong>Valor total:</strong> <span class="amount">R$ {{ "%.2f"|format(total_amount) }}</span></p>
+            <p><strong>Data da compra:</strong> {{ date }}</p>
+        </div>
+        
+        {% if draw_date %}
+        <div class="draw-date">
+            <h4>📅 Data do Sorteio</h4>
+            <p style="font-size: 18px; font-weight: bold; margin: 0;">{{ draw_date }}</p>
+            <p style="margin: 5px 0 0 0;">Fique atento! Entraremos em contato se você for o ganhador.</p>
+        </div>
+        {% endif %}
+        
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 20px 0;">
+            <h4>💝 Obrigado por apoiar nossa causa!</h4>
+            <p>Sua participação nesta rifa não só te dá a chance de ganhar um prêmio incrível, mas também ajuda diretamente no cuidado dos nossos animais. Cada real arrecadado é investido em:</p>
+            <ul>
+                <li>🏥 Tratamentos veterinários</li>
+                <li>🍖 Alimentação dos animais</li>
+                <li>✂️ Castrações e cirurgias</li>
+                <li>🏠 Manutenção do abrigo</li>
+            </ul>
+        </div>
+        
+        <h4>📋 Como funciona o sorteio:</h4>
+        <ol>
+            <li>O sorteio será realizado na data indicada</li>
+            <li>Todos os números vendidos participam</li>
+            <li>O ganhador será contactado imediatamente</li>
+            <li>Divulgaremos o resultado em nossas redes sociais</li>
+        </ol>
+        
+        <p>Guarde este email como comprovante da sua participação!</p>
+        
+        <p>Boa sorte e muito obrigado pelo seu apoio!</p>
+        
+        <p>Com carinho,<br>
+        <strong>Equipe {{ organization_name }}</strong></p>
+    </div>
+    
+    <div class="footer">
+        <p>{{ organization_name }}</p>
+        <p>Santos Dumont/MG</p>
+        <p>📧 contato@patasdobem.org.br | 📱 (32) 99999-9999</p>
+        
+        <div style="margin-top: 15px;">
+            <p>Acompanhe o sorteio nas nossas redes:</p>
+            <p>
+                <a href="https://instagram.com/patasdobem" style="color: #fbbf24; text-decoration: none;">Instagram</a> |
+                <a href="https://facebook.com/patasdobem" style="color: #fbbf24; text-decoration: none;">Facebook</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

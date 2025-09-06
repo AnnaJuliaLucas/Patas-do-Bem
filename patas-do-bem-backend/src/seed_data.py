@@ -158,7 +158,7 @@ def seed_database():
         
         db.session.commit()
         
-        print("✅ Banco de dados populado com sucesso!")
+        print("Banco de dados populado com sucesso!")
         print(f"- {len(donations)} doações criadas")
         print(f"- {len(raffles)} rifas criadas")
         print(f"- {len(tickets)} tickets criados")

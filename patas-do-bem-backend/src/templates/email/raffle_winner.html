@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parabéns! Você Ganhou!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="20">🎉</text></svg>') repeat;
+            opacity: 0.3;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px 20px;
+            border: 1px solid #ddd;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+        }
+        .winner-details {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 3px solid #16a34a;
+            text-align: center;
+        }
+        .winning-number {
+            background: #16a34a;
+            color: white;
+            padding: 20px;
+            border-radius: 50%;
+            font-size: 28px;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 60px;
+            min-height: 60px;
+            line-height: 20px;
+            margin: 10px;
+        }
+        .prize-info {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            margin: 20px 0;
+        }
+        .next-steps {
+            background: #dbeafe;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            margin: 20px 0;
+        }
+        .celebration {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="confetti"></div>
+        <div style="position: relative; z-index: 1;">
+            <h1>🏆 PARABÉNS! 🏆</h1>
+            <h2>VOCÊ É O GRANDE GANHADOR!</h2>
+        </div>
+    </div>
+    
+    <div class="content">
+        <div class="celebration">
+            🎉🎊🎈✨🎁
+        </div>
+        
+        <p style="font-size: 18px; text-align: center;"><strong>{{ winner_name }}</strong>, temos uma notícia INCRÍVEL para você!</p>
+        
+        <div class="winner-details">
+            <h3>🎯 VOCÊ GANHOU A RIFA!</h3>
+            <h4>{{ raffle_title }}</h4>
+            
+            <p>Número sorteado:</p>
+            <div class="winning-number">{{ "%02d"|format(winner_number) }}</div>
+            
+            <p style="margin-top: 20px; font-size: 16px;">
+                <strong>Este era seu número da sorte! 🍀</strong>
+            </p>
+        </div>
+        
+        {% if prize_description %}
+        <div class="prize-info">
+            <h4>🎁 Sobre seu prêmio:</h4>
+            <p>{{ prize_description }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="next-steps">
+            <h4>📋 Próximos passos:</h4>
+            <ol>
+                <li><strong>Entre em contato conosco</strong> em até 48 horas para confirmar sua vitória</li>
+                <li><strong>Traga um documento de identidade</strong> para retirada do prêmio</li>
+                <li><strong>Agende a retirada</strong> em horário comercial</li>
+                <li><strong>Compartilhe sua alegria</strong> nas redes sociais! 📸</li>
+            </ol>
+            
+            {% if contact_info %}
+            <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 5px;">
+                <strong>Contato para retirada:</strong><br>
+                {{ contact_info }}
+            </div>
+            {% else %}
+            <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 5px;">
+                <strong>Nossos contatos:</strong><br>
+                📧 contato@patasdobem.org.br<br>
+                📱 (32) 99999-9999<br>
+                📍 Santos Dumont/MG
+            </div>
+            {% endif %}
+        </div>
+        
+        <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <h4>💝 Muito obrigado por apoiar nossa causa!</h4>
+            <p>Sua participação nesta rifa ajudou diretamente no cuidado dos nossos animais. Você não só ganhou um prêmio incrível, mas também fez a diferença na vida de muitos peludinhos!</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="font-size: 18px; color: #16a34a; font-weight: bold;">
+                Estamos ansiosos para celebrar com você! 🎉
+            </p>
+        </div>
+        
+        <p>Mais uma vez, PARABÉNS! 🎊</p>
+        
+        <p>Com muita alegria,<br>
+        <strong>Equipe {{ organization_name }}</strong></p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>{{ organization_name }}</strong></p>
+        <p>Santos Dumont/MG</p>
+        <p>📧 contato@patasdobem.org.br | 📱 (32) 99999-9999</p>
+        
+        <div style="margin-top: 15px;">
+            <p><strong>Marque a gente nas suas fotos!</strong></p>
+            <p>
+                <a href="https://instagram.com/patasdobem" style="color: #fbbf24; text-decoration: none;">@patasdobem</a>
+            </p>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 12px; color: #ccc;">
+            <p>Este email confirma sua vitória na rifa. Guarde-o como comprovante.</p>
+        </div>
+    </div>
+</body>
+</html>

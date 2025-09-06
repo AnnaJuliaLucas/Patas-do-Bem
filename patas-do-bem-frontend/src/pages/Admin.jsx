@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { useApp } from '@/contexts/AppContext'
 import { 
   DollarSign, 
   Gift, 
@@ -23,11 +24,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function Admin() {
-  const [dashboardData, setDashboardData] = useState(null)
+  const { state, actions } = useApp()
   const [raffles, setRaffles] = useState([])
-  const [donations, setDonations] = useState([])
-  const [messages, setMessages] = useState([])
-  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('dashboard')
 
   // Estados para criação de rifa
@@ -42,20 +40,14 @@ export function Admin() {
   const [raffleMessage, setRaffleMessage] = useState('')
 
   useEffect(() => {
-    fetchDashboardData()
+    actions.loadDashboardData()
     fetchRaffles()
-    fetchDonations()
-    fetchMessages()
+    actions.loadDonations()
+    actions.loadContactMessages()
   }, [])
 
   const fetchDashboardData = async () => {
-    try {
-      const response = await fetch('/api/dashboard')
-      const data = await response.json()
-      setDashboardData(data)
-    } catch (error) {
-      console.error('Erro ao carregar dashboard:', error)
-    }
+    await actions.loadDashboardData()
   }
 
   const fetchRaffles = async () => {

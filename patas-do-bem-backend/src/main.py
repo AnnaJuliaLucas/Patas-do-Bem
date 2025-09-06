@@ -15,6 +15,8 @@ from src.routes.raffle import raffle_bp
 from src.routes.contact import contact_bp
 from src.routes.config import config_bp
 from src.routes.payment import payment_bp
+from src.routes.dashboard import dashboard_bp
+from src.routes.reports import reports_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
@@ -28,6 +30,8 @@ app.register_blueprint(donation_bp, url_prefix='/api')
 app.register_blueprint(raffle_bp, url_prefix='/api')
 app.register_blueprint(contact_bp, url_prefix='/api')
 app.register_blueprint(config_bp, url_prefix='/api')
+app.register_blueprint(dashboard_bp, url_prefix='/api')
+app.register_blueprint(reports_bp, url_prefix='/api')
 app.register_blueprint(payment_bp)
 
 # uncomment if you need to use database

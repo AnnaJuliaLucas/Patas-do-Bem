@@ -1,0 +1,8 @@
+{
+  "donation_id": 123,
+  "amount": 50.00,
+  "payment_method": "pix",
+  "status": "pending",
+  "pix_code": "PIX123456",
+  "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+}

@@ -9,9 +9,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useApp } from '@/contexts/AppContext'
 
 export function RifaDetalhes() {
   const { id } = useParams()
+  const { state, actions } = useApp()
   const [raffle, setRaffle] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedNumbers, setSelectedNumbers] = useState([])
@@ -22,7 +25,9 @@ export function RifaDetalhes() {
     phone: ''
   })
   const [purchasing, setPurchasing] = useState(false)
-  const [message, setMessage] = useState('')
+  const [availableNumbers, setAvailableNumbers] = useState([])
+  const [soldNumbers, setSoldNumbers] = useState([])
+  const [reservedNumbers, setReservedNumbers] = useState([])
 
   useEffect(() => {
     fetchRaffleDetails()
@@ -30,11 +35,23 @@ export function RifaDetalhes() {
 
   const fetchRaffleDetails = async () => {
     try {
-      const response = await fetch(`/api/raffles/${id}`)
-      const data = await response.json()
-      setRaffle(data.raffle)
+      setLoading(true)
+      
+      // Carregar detalhes da rifa
+      const raffleData = await actions.loadRaffle(id)
+      setRaffle(raffleData.raffle)
+      
+      // Carregar números disponíveis/vendidos
+      const numbersResponse = await fetch(`http://localhost:5000/api/raffles/${id}/numbers`)
+      const numbersData = await numbersResponse.json()
+      
+      setAvailableNumbers(numbersData.available_numbers || [])
+      setSoldNumbers(numbersData.sold_numbers || [])
+      setReservedNumbers(numbersData.reserved_numbers || [])
+      
     } catch (error) {
       console.error('Erro ao carregar detalhes da rifa:', error)
+      actions.showError('Erro ao carregar detalhes da rifa')
     } finally {
       setLoading(false)
     }
@@ -49,60 +66,50 @@ export function RifaDetalhes() {
   }
 
   const selectRandomNumbers = (count) => {
-    if (!raffle) return
+    if (!availableNumbers.length) return
     
-    const available = raffle.available_numbers
-    const shuffled = [...available].sort(() => 0.5 - Math.random())
-    const selected = shuffled.slice(0, Math.min(count, available.length))
+    const shuffled = [...availableNumbers].sort(() => 0.5 - Math.random())
+    const selected = shuffled.slice(0, Math.min(count, availableNumbers.length))
     setSelectedNumbers(selected)
   }
 
   const handlePurchase = async (e) => {
     e.preventDefault()
     setPurchasing(true)
-    setMessage('')
 
     try {
       if (selectedNumbers.length === 0) {
-        setMessage('Selecione pelo menos um número')
+        actions.showError('Selecione pelo menos um número')
         return
       }
 
       if (!buyerData.name || !buyerData.email) {
-        setMessage('Preencha nome e email')
+        actions.showError('Preencha nome e email')
         return
       }
 
-      const purchaseData = {
+      const ticketData = {
         buyer_name: buyerData.name,
         buyer_email: buyerData.email,
         buyer_phone: buyerData.phone,
-        ticket_numbers: selectedNumbers,
+        selected_numbers: selectedNumbers,
         payment_method: paymentMethod
       }
 
-      const response = await fetch(`/api/raffles/${id}/tickets`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(purchaseData)
-      })
+      // Usar a função do AppContext
+      const result = await actions.buyRaffleTickets(id, ticketData)
+      
+      actions.showSuccess('Números reservados com sucesso! Prossiga para o pagamento.')
+      
+      // Atualizar dados da rifa
+      await fetchRaffleDetails()
+      
+      // Limpar seleção
+      setSelectedNumbers([])
+      setBuyerData({ name: '', email: '', phone: '' })
 
-      const result = await response.json()
-
-      if (response.ok) {
-        setMessage(`Compra realizada com sucesso! ID: ${result.purchase_id}`)
-        // Atualizar dados da rifa
-        fetchRaffleDetails()
-        // Limpar seleção
-        setSelectedNumbers([])
-        setBuyerData({ name: '', email: '', phone: '' })
-      } else {
-        setMessage(result.error || 'Erro ao processar compra')
-      }
     } catch (error) {
-      setMessage('Erro ao conectar com o servidor')
+      console.error('Erro ao comprar números:', error)
     } finally {
       setPurchasing(false)
     }
@@ -159,7 +166,7 @@ export function RifaDetalhes() {
       </div>
 
       {/* Cabeçalho da Rifa */}
-      <div className="bg-gradient-to-r from-orange-600 to-yellow-500 text-white rounded-2xl p-8">
+      <div data-testid="raffle-header" className="bg-gradient-to-r from-orange-600 to-yellow-500 text-white rounded-2xl p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <h1 className="text-3xl md:text-4xl font-bold">{raffle.title}</h1>
@@ -171,7 +178,7 @@ export function RifaDetalhes() {
                 <div className="text-sm text-orange-200">por número</div>
               </div>
               <div>
-                <div className="text-2xl font-bold">{raffle.available_numbers}</div>
+                <div className="text-2xl font-bold">{availableNumbers.length}</div>
                 <div className="text-sm text-orange-200">disponíveis</div>
               </div>
               {raffle.draw_date && (
@@ -198,7 +205,7 @@ export function RifaDetalhes() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Seleção de Números */}
         <div className="lg:col-span-2 space-y-6">
-          <Card>
+          <Card data-testid="number-selection-card">
             <CardHeader>
               <CardTitle>Selecione Seus Números</CardTitle>
               <CardDescription>
@@ -212,7 +219,7 @@ export function RifaDetalhes() {
                   variant="outline" 
                   size="sm"
                   onClick={() => selectRandomNumbers(1)}
-                  disabled={raffle.available_numbers.length === 0}
+                  disabled={availableNumbers.length === 0}
                 >
                   1 Aleatório
                 </Button>
@@ -220,7 +227,7 @@ export function RifaDetalhes() {
                   variant="outline" 
                   size="sm"
                   onClick={() => selectRandomNumbers(3)}
-                  disabled={raffle.available_numbers.length < 3}
+                  disabled={availableNumbers.length < 3}
                 >
                   3 Aleatórios
                 </Button>
@@ -228,7 +235,7 @@ export function RifaDetalhes() {
                   variant="outline" 
                   size="sm"
                   onClick={() => selectRandomNumbers(5)}
-                  disabled={raffle.available_numbers.length < 5}
+                  disabled={availableNumbers.length < 5}
                 >
                   5 Aleatórios
                 </Button>
@@ -244,25 +251,40 @@ export function RifaDetalhes() {
               </div>
 
               {/* Grid de Números */}
-              <div className="grid grid-cols-10 gap-2 max-h-96 overflow-y-auto p-2">
+              <div data-testid="numbers-grid" className="grid grid-cols-10 gap-2 max-h-96 overflow-y-auto p-2">
                 {Array.from({ length: raffle.total_numbers }, (_, i) => i + 1).map((number) => {
-                  const isAvailable = raffle.available_numbers.includes(number)
+                  const isAvailable = availableNumbers.includes(number)
+                  const isSold = soldNumbers.includes(number)
+                  const isReserved = reservedNumbers.includes(number)
                   const isSelected = selectedNumbers.includes(number)
+                  
+                  let buttonClass = 'aspect-square rounded-lg text-sm font-medium transition-all '
+                  
+                  if (isSelected) {
+                    buttonClass += 'bg-orange-600 text-white shadow-lg scale-105'
+                  } else if (isAvailable) {
+                    buttonClass += 'bg-white border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                  } else if (isSold) {
+                    buttonClass += 'bg-red-100 text-red-400 cursor-not-allowed'
+                  } else if (isReserved) {
+                    buttonClass += 'bg-yellow-100 text-yellow-600 cursor-not-allowed'
+                  } else {
+                    buttonClass += 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }
                   
                   return (
                     <button
                       key={number}
+                      data-testid={`number-${number}`}
                       onClick={() => isAvailable && toggleNumber(number)}
                       disabled={!isAvailable}
-                      className={`
-                        aspect-square rounded-lg text-sm font-medium transition-all
-                        ${isSelected 
-                          ? 'bg-orange-600 text-white shadow-lg scale-105' 
-                          : isAvailable 
-                            ? 'bg-white border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50' 
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }
-                      `}
+                      className={buttonClass}
+                      title={
+                        isSold ? 'Número já vendido' :
+                        isReserved ? 'Número reservado' :
+                        isAvailable ? 'Clique para selecionar' :
+                        'Número indisponível'
+                      }
                     >
                       {number.toString().padStart(2, '0')}
                     </button>
@@ -292,8 +314,8 @@ export function RifaDetalhes() {
         </div>
 
         {/* Formulário de Compra */}
-        <div className="space-y-6">
-          <Card className="sticky top-24">
+        <div className="space-y-6 lg:sticky lg:top-24">
+          <Card data-testid="purchase-form">
             <CardHeader>
               <CardTitle>Finalizar Compra</CardTitle>
               <CardDescription>
@@ -383,15 +405,9 @@ export function RifaDetalhes() {
                   </div>
                 </div>
 
-                {message && (
-                  <Alert className={message.includes('sucesso') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <AlertDescription className={message.includes('sucesso') ? 'text-green-800' : 'text-red-800'}>
-                      {message}
-                    </AlertDescription>
-                  </Alert>
-                )}
 
                 <Button 
+                  data-testid="purchase-button"
                   type="submit" 
                   className="w-full bg-orange-600 hover:bg-orange-700"
                   disabled={purchasing || selectedNumbers.length === 0}
@@ -438,13 +454,13 @@ export function RifaDetalhes() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Progresso</span>
-                  <span>{raffle.sold_numbers}/{raffle.total_numbers}</span>
+                  <span>{soldNumbers.length}/{raffle.total_numbers}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-gradient-to-r from-orange-500 to-yellow-500 h-2 rounded-full"
                     style={{ 
-                      width: `${(raffle.sold_numbers / raffle.total_numbers) * 100}%` 
+                      width: `${(soldNumbers.length / raffle.total_numbers) * 100}%` 
                     }}
                   ></div>
                 </div>

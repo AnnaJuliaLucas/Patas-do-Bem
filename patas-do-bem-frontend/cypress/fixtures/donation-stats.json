@@ -1,0 +1,21 @@
+{
+  "total_amount": 2500.75,
+  "monthly_recurring": 800.50,
+  "total_donors": 45,
+  "recent_donations": [
+    {
+      "id": 1,
+      "donor_name": "Maria Silva",
+      "amount": 50.00,
+      "donation_type": "recurring",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "donor_name": "João Santos",
+      "amount": 100.00,
+      "donation_type": "one_time", 
+      "created_at": "2024-01-14T15:45:00Z"
+    }
+  ]
+}

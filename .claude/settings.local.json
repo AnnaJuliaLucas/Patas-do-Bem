@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(node:*)",
+      "Bash(pnpm:*)",
+      "Bash(py --version)",
+      "Bash(py:*)",
+      "Bash(npm install:*)",
+      "Bash(venvScripts:*)",
+      "Bash(.venvScriptsactivate)",
+      "Bash(source:*)",
+      "Bash(npx cypress open:*)",
+      "Bash(npx cypress:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(timeout 90s npx cypress run:*)",
+      "Bash(pip install:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

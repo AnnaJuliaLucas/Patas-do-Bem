@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useApp } from '@/contexts/AppContext'
 
 export function Contato() {
+  const { state, actions } = useApp()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,46 +17,28 @@ export function Contato() {
     subject: '',
     message: ''
   })
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    setMessage('')
 
     try {
       if (!formData.name || !formData.email || !formData.message) {
-        setMessage('Por favor, preencha nome, email e mensagem')
+        actions.showError('Por favor, preencha nome, email e mensagem')
         return
       }
 
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
+      await actions.sendContactMessage(formData)
+      
+      // Limpar formulário após sucesso
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
       })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        setMessage('Mensagem enviada com sucesso! Entraremos em contato em breve.')
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: ''
-        })
-      } else {
-        setMessage(result.error || 'Erro ao enviar mensagem')
-      }
     } catch (error) {
-      setMessage('Erro ao conectar com o servidor')
-    } finally {
-      setLoading(false)
+      // Error já é tratado pela action
     }
   }
 
@@ -190,20 +174,12 @@ export function Contato() {
                   />
                 </div>
 
-                {message && (
-                  <Alert className={message.includes('sucesso') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <AlertDescription className={message.includes('sucesso') ? 'text-green-800' : 'text-red-800'}>
-                      {message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
                 <Button 
                   type="submit" 
                   className="w-full bg-orange-600 hover:bg-orange-700"
-                  disabled={loading}
+                  disabled={state.contact.loading}
                 >
-                  {loading ? 'Enviando...' : (
+                  {state.contact.loading ? 'Enviando...' : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
                       Enviar Mensagem

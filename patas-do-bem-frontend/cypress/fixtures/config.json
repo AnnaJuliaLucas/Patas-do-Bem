@@ -1,0 +1,52 @@
+{
+  "organization_name": "Associação Patas do Bem",
+  "contact_info": {
+    "email": "contato@patasdobem.org",
+    "phone": "(32) 99999-9999",
+    "address": "Santos Dumont, MG"
+  },
+  "donation_plans": [
+    {
+      "id": "plan_20",
+      "amount": 20,
+      "name": "Apoiador",
+      "description": "Ajude com R$ 20 mensais"
+    },
+    {
+      "id": "plan_50", 
+      "amount": 50,
+      "name": "Protetor",
+      "description": "Ajude com R$ 50 mensais"
+    },
+    {
+      "id": "plan_100",
+      "amount": 100,
+      "name": "Guardião", 
+      "description": "Ajude com R$ 100 mensais"
+    }
+  ],
+  "social_links": {
+    "instagram": "https://instagram.com/patasdobem",
+    "facebook": "https://facebook.com/patasdobem",
+    "whatsapp": "https://wa.me/5532999999999",
+    "tiktok": "https://tiktok.com/@patasdobem"
+  },
+  "about": {
+    "mission": "Há uma década protegendo e cuidando de animais em Santos Dumont/MG. Junte-se a nós nessa missão de amor e transformação.",
+    "history": "Iniciamos há 10 anos com o Projeto Castra Cat, focado em castrações gratuitas para controle populacional. Com o tempo, expandimos nossas atividades para resgates, adoções e campanhas de conscientização.",
+    "activities": [
+      {
+        "title": "Projeto Castra Cat",
+        "description": "Castrações gratuitas para controle populacional responsável"
+      },
+      {
+        "title": "Resgates e Cuidados", 
+        "description": "Resgatamos animais em situação de risco e oferecemos cuidados veterinários"
+      },
+      {
+        "title": "Adoções Responsáveis",
+        "description": "Conectamos animais com famílias amorosas através de um processo cuidadoso"
+      }
+    ]
+  }
+}

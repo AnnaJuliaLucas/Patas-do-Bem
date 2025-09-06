@@ -1,8 +1,11 @@
 import { Heart, Instagram, Facebook, MessageCircle, Mail, Phone, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useApp } from '@/contexts/AppContext'
 import logoImg from '../assets/patas_do_bem_logo.png'
 
 export function Footer() {
+  const { state } = useApp()
+  
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -16,13 +19,18 @@ export function Footer() {
                 className="h-12 w-12 rounded-full"
               />
               <div>
-                <h3 className="text-xl font-bold">Patas do Bem</h3>
-                <p className="text-gray-400">Santos Dumont/MG</p>
+                <h3 className="text-xl font-bold">
+                  {state.config?.organization_name || 'Patas do Bem'}
+                </h3>
+                <p className="text-gray-400">
+                  {state.config?.location || 'Santos Dumont/MG'}
+                </p>
               </div>
             </div>
             <p className="text-gray-300 mb-4">
-              Há 10 anos protegendo e cuidando de animais em situação de vulnerabilidade, 
-              promovendo adoções responsáveis e conscientização sobre bem-estar animal.
+              {state.config?.description || 
+                'Há 10 anos protegendo e cuidando de animais em situação de vulnerabilidade, promovendo adoções responsáveis e conscientização sobre bem-estar animal.'
+              }
             </p>
             <div className="flex space-x-4">
               <Button variant="outline" size="sm" asChild>
@@ -91,15 +99,21 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-300">contato@patasdobem.org.br</span>
+                <span className="text-gray-300">
+                  {state.config?.contact_email || 'contato@patasdobem.org.br'}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-300">(32) 99999-9999</span>
+                <span className="text-gray-300">
+                  {state.config?.contact_phone || '(32) 99999-9999'}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-300">Santos Dumont, MG</span>
+                <span className="text-gray-300">
+                  {state.config?.location || 'Santos Dumont, MG'}
+                </span>
               </div>
             </div>
           </div>
@@ -109,7 +123,7 @@ export function Footer() {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2025 Associação Patas do Bem. Todos os direitos reservados.
+              © {new Date().getFullYear()} {state.config?.organization_name || 'Associação Patas do Bem'}. Todos os direitos reservados.
             </p>
             <div className="flex items-center space-x-2 mt-4 md:mt-0">
               <Heart className="h-4 w-4 text-red-500" />

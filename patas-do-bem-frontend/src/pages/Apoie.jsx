@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react'
 import { Heart, Users, TrendingUp, CheckCircle, Star } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group'
 import { PaymentModal } from '../components/PaymentModal'
+import { useApp } from '@/contexts/AppContext'
 
 export function Apoie() {
+  const { state, actions } = useApp()
+  const { config } = state
+  
   const [donationType, setDonationType] = useState('recurring')
   const [selectedPlan, setSelectedPlan] = useState('plan_50')
   const [customAmount, setCustomAmount] = useState('')
@@ -15,11 +19,22 @@ export function Apoie() {
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [paymentData, setPaymentData] = useState(null)
 
-  const plans = [
-    { id: 'plan_20', amount: 20, name: 'Apoiador', description: 'Ajude com R$ 20 mensais', popular: false },
-    { id: 'plan_50', amount: 50, name: 'Protetor', description: 'Ajude com R$ 50 mensais', popular: true },
-    { id: 'plan_100', amount: 100, name: 'Guardião', description: 'Ajude com R$ 100 mensais', popular: false }
-  ]
+  const getPlans = () => {
+    if (config?.donation_plans) {
+      return config.donation_plans.map(plan => ({
+        ...plan,
+        popular: plan.amount === 50
+      }))
+    }
+    
+    return [
+      { id: 'plan_20', amount: 20, name: 'Apoiador', description: 'Ajude com R$ 20 mensais', popular: false },
+      { id: 'plan_50', amount: 50, name: 'Protetor', description: 'Ajude com R$ 50 mensais', popular: true },
+      { id: 'plan_100', amount: 100, name: 'Guardião', description: 'Ajude com R$ 100 mensais', popular: false }
+    ]
+  }
+
+  const plans = getPlans()
 
   const getCurrentAmount = () => {
     if (selectedPlan === 'custom') {
@@ -37,33 +52,50 @@ export function Apoie() {
     return plan ? plan.name : ''
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     const amount = getCurrentAmount()
     if (amount <= 0) {
-      alert('Por favor, selecione um valor válido')
+      actions.showError('Por favor, selecione um valor válido')
       return
     }
 
     if (!formData.name || !formData.email) {
-      alert('Por favor, preencha nome e email')
+      actions.showError('Por favor, preencha nome e email')
       return
     }
 
-    // Preparar dados do pagamento
-    const payment = {
-      amount: amount,
-      description: donationType === 'recurring' 
-        ? `Doação Mensal - ${getCurrentPlanName()} - Patas do Bem`
-        : `Doação Única - Patas do Bem`,
-      type: 'donation',
-      donationType: donationType,
-      payer: formData
-    }
+    try {
+      // Criar a doação no backend
+      const donationData = {
+        donor_name: formData.name,
+        donor_email: formData.email,
+        donor_phone: formData.phone,
+        amount: amount,
+        donation_type: donationType,
+        payment_method: 'pix' // Default to PIX, will be updated in payment modal
+      }
 
-    setPaymentData(payment)
-    setShowPaymentModal(true)
+      const donation = await actions.createDonation(donationData)
+
+      // Preparar dados do pagamento
+      const payment = {
+        donation_id: donation.donation_id,
+        amount: amount,
+        description: donationType === 'recurring' 
+          ? `Doação Mensal - ${getCurrentPlanName()} - Patas do Bem`
+          : `Doação Única - Patas do Bem`,
+        type: 'donation',
+        donationType: donationType,
+        payer: formData
+      }
+
+      setPaymentData(payment)
+      setShowPaymentModal(true)
+    } catch (error) {
+      console.error('Erro ao criar doação:', error)
+    }
   }
 
   const handlePaymentSuccess = (result) => {
@@ -71,10 +103,11 @@ export function Apoie() {
     setShowPaymentModal(false)
     
     // Mostrar mensagem de sucesso
-    alert('Pagamento processado com sucesso! Obrigado pelo seu apoio!')
+    actions.showSuccess('Pagamento processado com sucesso! Obrigado pelo seu apoio!')
     
     // Reset form
     setFormData({ name: '', email: '', phone: '' })
+    setCustomAmount('')
   }
 
   return (

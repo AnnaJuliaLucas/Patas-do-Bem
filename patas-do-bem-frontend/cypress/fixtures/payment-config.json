@@ -1,0 +1,9 @@
+{
+  "mercado_pago": {
+    "public_key": "TEST-12345"
+  },
+  "pix": {
+    "key": "32999999999",
+    "recipient_name": "Associação Patas do Bem"
+  }
+}

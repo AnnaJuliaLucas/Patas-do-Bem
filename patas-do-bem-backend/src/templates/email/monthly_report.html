@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Mensal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px 20px;
+            border: 1px solid #ddd;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            position: relative;
+        }
+        .stat-card.donations {
+            border-color: #16a34a;
+        }
+        .stat-card.amount {
+            border-color: #ea580c;
+        }
+        .stat-card.donors {
+            border-color: #3b82f6;
+        }
+        .stat-card.raffles {
+            border-color: #a855f7;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-card.donations .stat-number { color: #16a34a; }
+        .stat-card.amount .stat-number { color: #ea580c; }
+        .stat-card.donors .stat-number { color: #3b82f6; }
+        .stat-card.raffles .stat-number { color: #a855f7; }
+        
+        .stat-label {
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .stat-description {
+            color: #374151;
+            margin-top: 5px;
+        }
+        .summary-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 5px solid #7c3aed;
+        }
+        .highlight {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            margin: 20px 0;
+        }
+        .achievement {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0fdf4;
+            border-radius: 5px;
+            border-left: 3px solid #16a34a;
+        }
+        .achievement-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Relatório Mensal</h1>
+        <h2>{{ month_year }}</h2>
+        <p>Transparência e prestação de contas</p>
+    </div>
+    
+    <div class="content">
+        <div class="summary-section">
+            <h3>📈 Resumo do Mês</h3>
+            <p>Confira os principais indicadores de {{ month_year }} e veja como sua contribuição está fazendo a diferença na vida dos nossos animais.</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card donations">
+                <div class="stat-label">Total de Doações</div>
+                <div class="stat-number">{{ total_donations }}</div>
+                <div class="stat-description">Contribuições recebidas</div>
+            </div>
+            
+            <div class="stat-card amount">
+                <div class="stat-label">Valor Arrecadado</div>
+                <div class="stat-number">R$ {{ "%.2f"|format(total_amount) }}</div>
+                <div class="stat-description">Recursos para os animais</div>
+            </div>
+            
+            <div class="stat-card donors">
+                <div class="stat-label">Novos Apoiadores</div>
+                <div class="stat-number">{{ new_donors }}</div>
+                <div class="stat-description">Pessoas que se juntaram à causa</div>
+            </div>
+            
+            <div class="stat-card raffles">
+                <div class="stat-label">Rifas Realizadas</div>
+                <div class="stat-number">{{ raffles_completed }}</div>
+                <div class="stat-description">Sorteios concluídos</div>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h4>🎯 Como os recursos foram utilizados:</h4>
+            <ul>
+                <li><strong>50%</strong> - Tratamentos veterinários e medicamentos</li>
+                <li><strong>25%</strong> - Alimentação e suplementos</li>
+                <li><strong>15%</strong> - Manutenção do abrigo e equipamentos</li>
+                <li><strong>10%</strong> - Campanhas de castração</li>
+            </ul>
+        </div>
+        
+        {% if animals_helped > 0 %}
+        <div class="summary-section">
+            <h4>🐾 Impacto no bem-estar animal:</h4>
+            <div class="achievement">
+                <div class="achievement-icon">🏥</div>
+                <div>
+                    <strong>{{ animals_helped }} animais foram atendidos</strong><br>
+                    <small>Incluindo consultas, cirurgias e tratamentos</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="summary-section">
+            <h4>🏆 Conquistas do mês:</h4>
+            <div class="achievement">
+                <div class="achievement-icon">💝</div>
+                <div>
+                    <strong>{{ total_donations }} doações recebidas</strong><br>
+                    <small>Cada contribuição fez a diferença</small>
+                </div>
+            </div>
+            
+            {% if raffles_completed > 0 %}
+            <div class="achievement">
+                <div class="achievement-icon">🎟️</div>
+                <div>
+                    <strong>{{ raffles_completed }} rifas realizadas com sucesso</strong><br>
+                    <small>Engajamento da comunidade e recursos para os animais</small>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="achievement">
+                <div class="achievement-icon">👥</div>
+                <div>
+                    <strong>{{ new_donors }} novos apoiadores</strong><br>
+                    <small>Nossa família está crescendo</small>
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: #dbeafe; padding: 25px; border-radius: 10px; margin: 25px 0; border-left: 5px solid #3b82f6;">
+            <h4>📅 Próximas ações:</h4>
+            <ul>
+                <li><strong>Campanha de castração</strong> - Prevista para o próximo mês</li>
+                <li><strong>Mutirão de adoção</strong> - Evento especial em preparação</li>
+                <li><strong>Melhorias no abrigo</strong> - Reformas e novos equipamentos</li>
+                <li><strong>Programa de voluntariado</strong> - Expansão da equipe</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0; padding: 25px; background: #fef3c7; border-radius: 10px;">
+            <h4 style="color: #92400e; margin-bottom: 15px;">🙏 Nosso mais sincero obrigado!</h4>
+            <p style="color: #451a03; margin: 0; font-size: 16px;">
+                Cada doação, cada compartilhamento, cada gesto de carinho faz parte desta transformação. 
+                Juntos, estamos mudando vidas e construindo um mundo melhor para os animais.
+            </p>
+        </div>
+        
+        <p style="text-align: center; margin-top: 30px;">
+            Com gratidão e transparência,<br>
+            <strong>Equipe {{ organization_name }}</strong>
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>{{ organization_name }}</strong></p>
+        <p>Santos Dumont/MG</p>
+        <p>📧 contato@patasdobem.org.br | 📱 (32) 99999-9999</p>
+        
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #555;">
+            <p style="font-size: 12px; color: #ccc;">
+                Este é um relatório automatizado enviado mensalmente.<br>
+                Para alterar suas preferências de recebimento, entre em contato conosco.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

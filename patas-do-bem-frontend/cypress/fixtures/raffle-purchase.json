@@ -1,0 +1,10 @@
+{
+  "purchase_id": "RAFFLE1_123",
+  "raffle_id": 1,
+  "ticket_numbers": [1],
+  "total_amount": 10.00,
+  "payment_method": "pix",
+  "status": "pending",
+  "pix_code": "RIFAPIX1123",
+  "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+}

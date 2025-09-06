@@ -1,30 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Gift, Calendar, Users, ArrowRight, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useApp } from '@/contexts/AppContext'
 
 export function Rifas() {
-  const [raffles, setRaffles] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { state, actions } = useApp()
+  const { raffles } = state
 
   useEffect(() => {
-    fetchRaffles()
-  }, [])
-
-  const fetchRaffles = async () => {
-    try {
-      const response = await fetch('/api/raffles')
-      const data = await response.json()
-      setRaffles(data.raffles || [])
-    } catch (error) {
-      console.error('Erro ao carregar rifas:', error)
-    } finally {
-      setLoading(false)
+    if (raffles.list.length === 0 && !raffles.loading) {
+      actions.loadRaffles()
     }
-  }
+  }, [])
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Data a definir'
@@ -38,7 +29,7 @@ export function Rifas() {
     return 'bg-red-100 text-red-800'
   }
 
-  if (loading) {
+  if (raffles.loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
@@ -81,17 +72,17 @@ export function Rifas() {
       </div>
 
       {/* Rifas Ativas */}
-      {raffles.length > 0 ? (
+      {raffles.list.length > 0 ? (
         <div className="space-y-8">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900">Rifas Ativas</h2>
             <Badge className="bg-green-100 text-green-800">
-              {raffles.length} rifa{raffles.length !== 1 ? 's' : ''} disponível{raffles.length !== 1 ? 'eis' : ''}
+              {raffles.list.length} rifa{raffles.list.length !== 1 ? 's' : ''} disponível{raffles.list.length !== 1 ? 'eis' : ''}
             </Badge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {raffles.map((raffle) => (
+            {raffles.list.map((raffle) => (
               <Card key={raffle.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
                 {/* Imagem da Rifa */}
                 <div className="h-48 bg-gradient-to-br from-orange-200 to-yellow-200 relative overflow-hidden">
@@ -158,9 +149,11 @@ export function Rifas() {
                   {/* Botão de Ação */}
                   <Button asChild className="w-full bg-orange-600 hover:bg-orange-700 group">
                     <Link to={`/rifas/${raffle.id}`}>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Participar da Rifa
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Participar da Rifa
+                        <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </>
                     </Link>
                   </Button>
                 </CardContent>

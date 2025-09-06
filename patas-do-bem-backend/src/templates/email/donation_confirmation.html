@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Doação</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #ea580c, #f59e0b);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px 20px;
+            border: 1px solid #ddd;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+        }
+        .donation-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ea580c;
+        }
+        .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ea580c;
+        }
+        .thank-you {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐾 Obrigado pela sua doação!</h1>
+        <p>Sua generosidade faz toda a diferença</p>
+    </div>
+    
+    <div class="content">
+        <p>Olá, <strong>{{ donor_name }}</strong>!</p>
+        
+        <p>Recebemos sua doação com muito carinho e gratidão. Cada contribuição nos ajuda a continuar nosso trabalho de proteção e cuidado com os animais.</p>
+        
+        <div class="donation-details">
+            <h3>Detalhes da sua doação:</h3>
+            <p><strong>Valor:</strong> <span class="amount">R$ {{ "%.2f"|format(amount) }}</span></p>
+            <p><strong>Tipo:</strong> {{ 'Doação Mensal (Recorrente)' if donation_type == 'recurring' else 'Doação Única' }}</p>
+            <p><strong>Método:</strong> {{ payment_method.upper() }}</p>
+            <p><strong>Data:</strong> {{ date }}</p>
+        </div>
+        
+        {% if donation_type == 'recurring' %}
+        <div class="thank-you">
+            <h4>💝 Doação Recorrente</h4>
+            <p>Você optou por uma doação mensal! Isso significa que todo mês você estará ajudando nossos animais de forma contínua. Você pode cancelar a qualquer momento através do nosso site ou entrando em contato conosco.</p>
+        </div>
+        {% endif %}
+        
+        <div class="thank-you">
+            <h4>🙏 Como sua doação ajuda:</h4>
+            <ul>
+                <li>🏥 Tratamentos veterinários</li>
+                <li>🍖 Alimentação dos animais</li>
+                <li>✂️ Castrações e cirurgias</li>
+                <li>🏠 Manutenção do abrigo</li>
+                <li>💊 Medicamentos e vacinas</li>
+            </ul>
+        </div>
+        
+        <p>Manteremos você informado sobre como sua contribuição está fazendo a diferença na vida dos nossos peludinhos!</p>
+        
+        <p>Com muito carinho,<br>
+        <strong>Equipe {{ organization_name }}</strong></p>
+    </div>
+    
+    <div class="footer">
+        <p>{{ organization_name }}</p>
+        <p>Santos Dumont/MG</p>
+        <p>📧 contato@patasdobem.org.br | 📱 (32) 99999-9999</p>
+        
+        <div style="margin-top: 15px;">
+            <p>Siga-nos nas redes sociais:</p>
+            <p>
+                <a href="https://instagram.com/patasdobem" style="color: #fbbf24; text-decoration: none;">Instagram</a> |
+                <a href="https://facebook.com/patasdobem" style="color: #fbbf24; text-decoration: none;">Facebook</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

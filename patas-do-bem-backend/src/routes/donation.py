@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from src.models.user import db
 from src.models.donation import Donation
+from src.services.payment_factory import get_payment_gateway
+from src.services.payment_gateway import PaymentMethod
 
 donation_bp = Blueprint('donation', __name__)
 
@@ -55,23 +57,53 @@ def create_donation():
         db.session.add(donation)
         db.session.commit()
         
-        # Simular dados de pagamento (em produção, integrar com gateway real)
-        payment_data = {
-            'donation_id': donation.id,
-            'amount': float(donation.amount),
-            'payment_method': donation.payment_method,
-            'status': 'pending'
+        # Usar gateway de pagamento
+        gateway = get_payment_gateway()
+        
+        # Preparar dados para o gateway
+        gateway_data = {
+            'amount': amount,
+            'payment_method': data['payment_method'],
+            'payer_name': data['donor_name'],
+            'payer_email': data['donor_email'],
+            'payer_phone': data.get('donor_phone', ''),
+            'description': f'Doação {donation.donation_type} - Patas do Bem'
         }
         
-        if donation.payment_method == 'pix':
-            payment_data['pix_code'] = f'PIX{donation.id:06d}'
-            payment_data['qr_code'] = f'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-        elif donation.payment_method == 'boleto':
-            payment_data['boleto_url'] = f'/api/donations/{donation.id}/boleto'
-        elif donation.payment_method == 'credit_card':
-            payment_data['card_form_url'] = f'/api/donations/{donation.id}/card-form'
+        if data['donation_type'] == 'recurring':
+            # Criar assinatura recorrente
+            payment_result = gateway.create_subscription(gateway_data)
+        else:
+            # Criar pagamento único
+            payment_result = gateway.create_payment(gateway_data)
         
-        return jsonify(payment_data), 201
+        if not payment_result['success']:
+            # Rollback da doação se pagamento falhar
+            db.session.delete(donation)
+            db.session.commit()
+            return jsonify({'error': payment_result['message']}), 400
+        
+        # Atualizar doação com ID do pagamento
+        donation.payment_id = payment_result['payment_id']
+        if 'subscription_id' in payment_result.get('data', {}):
+            donation.subscription_id = payment_result['data']['subscription_id']
+        
+        db.session.commit()
+        
+        # Preparar resposta
+        response_data = {
+            'donation_id': donation.id,
+            'payment_id': payment_result['payment_id'],
+            'amount': float(donation.amount),
+            'payment_method': donation.payment_method,
+            'status': payment_result['status']
+        }
+        
+        # Adicionar dados específicos do método de pagamento
+        if payment_result.get('data'):
+            response_data.update(payment_result['data'])
+        
+        return jsonify(response_data), 201
         
     except Exception as e:
         db.session.rollback()

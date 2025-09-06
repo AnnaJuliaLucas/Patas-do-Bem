@@ -83,11 +83,14 @@ def get_dashboard_data():
         # Estatísticas de rifas
         active_raffles = Raffle.query.filter(Raffle.status == 'active').count()
         
-        total_raffle_revenue = db.session.query(
-            db.func.sum(Raffle.ticket_price * db.func.count(RaffleTicket.id))
-        ).join(RaffleTicket).filter(
+        # Calculando receita das rifas corretamente
+        raffle_tickets_completed = db.session.query(RaffleTicket).join(Raffle).filter(
             RaffleTicket.payment_status == 'completed'
-        ).scalar() or 0
+        ).all()
+        
+        total_raffle_revenue = 0
+        for ticket in raffle_tickets_completed:
+            total_raffle_revenue += ticket.raffle.ticket_price
         
         # Mensagens não lidas
         unread_messages = ContactMessage.query.filter(ContactMessage.status == 'new').count()

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Mensagem de Contato</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px 20px;
+            border: 1px solid #ddd;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+        }
+        .contact-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        .message-content {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #cbd5e1;
+        }
+        .urgent {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+        .sender-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .info-item {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #3b82f6;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #475569;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .info-value {
+            color: #1e293b;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📬 Nova Mensagem de Contato</h1>
+        <p>Formulário do site</p>
+    </div>
+    
+    <div class="content">
+        <p><strong>Uma nova mensagem foi recebida através do formulário de contato do site.</strong></p>
+        
+        <div class="contact-details">
+            <h3>📋 Informações do Remetente</h3>
+            
+            <div class="sender-info">
+                <div class="info-item">
+                    <div class="info-label">Nome</div>
+                    <div class="info-value">{{ name }}</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">{{ email }}</div>
+                </div>
+                
+                {% if phone %}
+                <div class="info-item">
+                    <div class="info-label">Telefone</div>
+                    <div class="info-value">{{ phone }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="info-item">
+                    <div class="info-label">Data</div>
+                    <div class="info-value">{{ date }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="contact-details">
+            <h3>📝 Assunto</h3>
+            <p style="font-size: 16px; font-weight: 500; color: #1e293b;">{{ subject }}</p>
+        </div>
+        
+        <div class="message-content">
+            <h4>💬 Mensagem:</h4>
+            <div style="background: white; padding: 15px; border-radius: 5px; border-left: 3px solid #3b82f6;">
+                {{ message|nl2br }}
+            </div>
+        </div>
+        
+        <div style="background: #dbeafe; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6; margin: 20px 0;">
+            <h4>⚡ Ações Recomendadas:</h4>
+            <ul>
+                <li><strong>Responda em até 24 horas</strong> para manter um bom atendimento</li>
+                <li><strong>Verifique se é uma dúvida frequente</strong> que pode ser adicionada ao FAQ</li>
+                <li><strong>Se for sobre adoção</strong>, encaminhe para o responsável pelo setor</li>
+                <li><strong>Se for uma emergência</strong>, entre em contato por telefone</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 25px 0; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+            <p style="margin: 0; color: #475569;">
+                <strong>Para responder:</strong> Use o email {{ email }} ou telefone {% if phone %}{{ phone }}{% else %}disponível no cadastro{% endif %}
+            </p>
+        </div>
+        
+        <hr style="border: 1px solid #e2e8f0; margin: 25px 0;">
+        
+        <p style="font-size: 14px; color: #64748b;">
+            Esta mensagem foi enviada automaticamente pelo sistema de contato do site {{ organization_name }}.<br>
+            <strong>Não responda a este email.</strong> Para entrar em contato com {{ name }}, use as informações fornecidas acima.
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Sistema {{ organization_name }}</strong></p>
+        <p>Notificação automática - Site Oficial</p>
+        <p style="font-size: 12px; margin-top: 15px; color: #9ca3af;">
+            Para alterar as configurações de notificação, acesse o painel administrativo
+        </p>
+    </div>
+</body>
+</html>

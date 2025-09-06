@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Heart, Gift, Phone, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useApp } from '@/contexts/AppContext'
 import logoImg from '../assets/patas_do_bem_logo.png'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
+  const { state } = useApp()
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
@@ -29,8 +31,12 @@ export function Header() {
               className="h-12 w-12 rounded-full"
             />
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-900">Patas do Bem</h1>
-              <p className="text-sm text-gray-600">Santos Dumont/MG</p>
+              <h1 className="text-xl font-bold text-gray-900">
+                {state.config?.organization_name || 'Patas do Bem'}
+              </h1>
+              <p className="text-sm text-gray-600">
+                {state.config?.location || 'Santos Dumont/MG'}
+              </p>
             </div>
           </Link>
 
@@ -59,8 +65,10 @@ export function Header() {
           <div className="hidden md:block">
             <Button asChild className="bg-orange-600 hover:bg-orange-700">
               <Link to="/apoie">
-                <Heart className="h-4 w-4 mr-2" />
-                Doar Agora
+                <>
+                  <Heart className="h-4 w-4 mr-2" />
+                  Doar Agora
+                </>
               </Link>
             </Button>
           </div>
@@ -106,8 +114,10 @@ export function Header() {
               <div className="pt-2">
                 <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
                   <Link to="/apoie" onClick={() => setIsMenuOpen(false)}>
-                    <Heart className="h-4 w-4 mr-2" />
-                    Doar Agora
+                    <>
+                      <Heart className="h-4 w-4 mr-2" />
+                      Doar Agora
+                    </>
                   </Link>
                 </Button>
               </div>
