@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from src.models.user import db
 from src.models.raffle import Raffle, RaffleTicket
+from src.services.auth_service import token_required, admin_required
 
 raffle_bp = Blueprint('raffle', __name__)
 
@@ -53,6 +54,8 @@ def get_raffle(raffle_id):
         return jsonify({'error': str(e)}), 500
 
 @raffle_bp.route('/raffles', methods=['POST'])
+@token_required
+@admin_required
 def create_raffle():
     """Criar nova rifa (Admin)"""
     try:
@@ -85,6 +88,8 @@ def create_raffle():
         return jsonify({'error': str(e)}), 500
 
 @raffle_bp.route('/raffles/<int:raffle_id>', methods=['PUT'])
+@token_required
+@admin_required
 def update_raffle(raffle_id):
     """Atualizar rifa (Admin)"""
     try:
@@ -110,6 +115,8 @@ def update_raffle(raffle_id):
         return jsonify({'error': str(e)}), 500
 
 @raffle_bp.route('/raffles/<int:raffle_id>', methods=['DELETE'])
+@token_required
+@admin_required
 def cancel_raffle(raffle_id):
     """Cancelar rifa (Admin)"""
     try:
@@ -314,6 +321,8 @@ def get_raffle_numbers(raffle_id):
         return jsonify({'error': str(e)}), 500
 
 @raffle_bp.route('/raffles/<int:raffle_id>/draw', methods=['POST'])
+@token_required
+@admin_required
 def draw_raffle(raffle_id):
     """Realizar sorteio da rifa (Admin)"""
     try:

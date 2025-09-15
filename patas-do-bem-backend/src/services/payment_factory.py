@@ -62,19 +62,17 @@ class PaymentGatewayFactory:
     def _create_mercadopago_gateway(self):
         """
         Cria gateway do Mercado Pago
-        TODO: Implementar quando necessário
         """
         try:
             # Importar e criar gateway do Mercado Pago
-            # from .mercadopago_gateway import MercadoPagoGateway
-            # return MercadoPagoGateway()
-            
-            # Por enquanto, retornar mock se não implementado
-            logger.warning("Gateway Mercado Pago não implementado, usando Mock")
-            return MockPaymentGateway()
+            from .mercadopago_gateway import MercadoPagoGateway
+            return MercadoPagoGateway()
         
-        except ImportError:
-            logger.error("Gateway Mercado Pago não disponível, usando Mock")
+        except ImportError as e:
+            logger.error(f"Gateway Mercado Pago não disponível: {e}, usando Mock")
+            return MockPaymentGateway()
+        except Exception as e:
+            logger.error(f"Erro ao criar gateway Mercado Pago: {e}, usando Mock")
             return MockPaymentGateway()
     
     def _create_stripe_gateway(self):

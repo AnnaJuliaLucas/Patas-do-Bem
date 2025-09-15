@@ -5,6 +5,7 @@ from src.models.user import db
 from src.models.donation import Donation
 from src.models.raffle import Raffle, RaffleTicket
 from src.models.contact import ContactMessage
+from src.services.auth_service import token_required, admin_required
 import csv
 import io
 import json
@@ -13,6 +14,8 @@ from collections import defaultdict
 reports_bp = Blueprint('reports', __name__)
 
 @reports_bp.route('/reports/dashboard', methods=['GET'])
+@token_required
+@admin_required
 def dashboard_stats():
     """Estatísticas para o dashboard administrativo"""
     try:
@@ -108,6 +111,8 @@ def dashboard_stats():
         return jsonify({'error': str(e)}), 500
 
 @reports_bp.route('/reports/donations', methods=['GET'])
+@token_required
+@admin_required
 def donations_report():
     """Relatório detalhado de doações"""
     try:
@@ -163,6 +168,8 @@ def donations_report():
         return jsonify({'error': str(e)}), 500
 
 @reports_bp.route('/reports/raffles', methods=['GET'])
+@token_required
+@admin_required
 def raffles_report():
     """Relatório detalhado de rifas"""
     try:
@@ -211,6 +218,8 @@ def raffles_report():
         return jsonify({'error': str(e)}), 500
 
 @reports_bp.route('/reports/financial', methods=['GET'])
+@token_required
+@admin_required
 def financial_report():
     """Relatório financeiro consolidado"""
     try:
@@ -291,6 +300,8 @@ def financial_report():
         return jsonify({'error': str(e)}), 500
 
 @reports_bp.route('/reports/export/donations', methods=['GET'])
+@token_required
+@admin_required
 def export_donations():
     """Exportar relatório de doações em CSV"""
     try:
@@ -344,6 +355,8 @@ def export_donations():
         return jsonify({'error': str(e)}), 500
 
 @reports_bp.route('/reports/monthly-summary', methods=['GET'])
+@token_required
+@admin_required
 def monthly_summary():
     """Relatório de resumo mensal para emails automatizados"""
     try:

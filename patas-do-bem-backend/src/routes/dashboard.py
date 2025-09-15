@@ -5,10 +5,13 @@ from src.models.user import db
 from src.models.donation import Donation
 from src.models.raffle import Raffle, RaffleTicket
 from src.models.contact import ContactMessage
+from src.services.auth_service import token_required, admin_required
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
 @dashboard_bp.route('/dashboard', methods=['GET'])
+@token_required
+@admin_required
 def get_dashboard_data():
     """Get dashboard statistics and data"""
     try:
