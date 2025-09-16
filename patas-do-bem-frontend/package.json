@@ -14,7 +14,16 @@
     "cypress:run:frontend": "cypress run --spec 'cypress/e2e/frontend/**/*'",
     "cypress:run:flows": "cypress run --spec 'cypress/e2e/flows/**/*'",
     "test": "cypress run",
-    "test:ci": "cypress run --headless --reporter json"
+    "test:ci": "cypress run --headless --reporter json",
+    "test:admin": "cypress run --spec 'cypress/e2e/admin-*.cy.js'",
+    "test:login": "cypress run --spec 'cypress/e2e/admin-login.cy.js'",
+    "test:dashboard": "cypress run --spec 'cypress/e2e/admin-dashboard.cy.js'",
+    "test:raffles": "cypress run --spec 'cypress/e2e/admin-raffles.cy.js'",
+    "test:upload": "cypress run --spec 'cypress/e2e/image-upload.cy.js'",
+    "e2e": "node scripts/run-e2e-tests.js",
+    "e2e:headless": "node scripts/run-e2e-tests.js --headless",
+    "e2e:chrome": "node scripts/run-e2e-tests.js --browser chrome",
+    "e2e:firefox": "node scripts/run-e2e-tests.js --browser firefox"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

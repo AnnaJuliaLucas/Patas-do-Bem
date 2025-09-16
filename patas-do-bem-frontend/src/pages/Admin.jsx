@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useApp } from '@/contexts/AppContext'
 import { 
   DollarSign, 
@@ -12,30 +11,42 @@ import {
   Trash2,
   Calendar,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { DashboardCharts } from '@/components/DashboardCharts'
+import { ImageUpload } from '@/components/ImageUpload'
+import { ValidatedInput, useFormValidation } from '@/components/FormValidation'
 
 export function Admin() {
   const { state, actions } = useApp()
   const [raffles, setRaffles] = useState([])
   const [activeTab, setActiveTab] = useState('dashboard')
 
-  // Estados para criação de rifa
-  const [newRaffle, setNewRaffle] = useState({
+  // Form validation for raffle creation
+  const {
+    values: newRaffle,
+    validations,
+    isFormValid,
+    setValue: setRaffleValue,
+    setValidation,
+    reset: resetForm
+  } = useFormValidation({
     title: '',
     description: '',
     ticket_price: '',
     total_numbers: '',
-    draw_date: ''
+    draw_date: '',
+    image_url: '',
+    thumbnail_url: ''
   })
+  
   const [creatingRaffle, setCreatingRaffle] = useState(false)
   const [raffleMessage, setRaffleMessage] = useState('')
 
@@ -82,8 +93,19 @@ export function Admin() {
     }
   }
 
+  const handleImageUploaded = (imageUrl, thumbnailUrl) => {
+    setRaffleValue('image_url', imageUrl)
+    setRaffleValue('thumbnail_url', thumbnailUrl)
+  }
+
   const handleCreateRaffle = async (e) => {
     e.preventDefault()
+    
+    if (!isFormValid) {
+      setRaffleMessage('Por favor, corrija os erros no formulário')
+      return
+    }
+    
     setCreatingRaffle(true)
     setRaffleMessage('')
 
@@ -98,6 +120,7 @@ export function Admin() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         },
         body: JSON.stringify(raffleData)
       })
@@ -106,13 +129,7 @@ export function Admin() {
 
       if (response.ok) {
         setRaffleMessage('Rifa criada com sucesso!')
-        setNewRaffle({
-          title: '',
-          description: '',
-          ticket_price: '',
-          total_numbers: '',
-          draw_date: ''
-        })
+        resetForm()
         fetchRaffles()
       } else {
         setRaffleMessage(result.error || 'Erro ao criar rifa')
@@ -210,8 +227,11 @@ export function Admin() {
             })}
           </div>
 
+          {/* Dashboard Charts */}
+          <DashboardCharts dashboardData={state.dashboardData} />
+
           {/* Ações Pendentes */}
-          {dashboardData?.pending_actions?.length > 0 && (
+          {state.dashboardData?.pending_actions?.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -221,7 +241,7 @@ export function Admin() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {dashboardData.pending_actions.map((action, index) => (
+                  {state.dashboardData.pending_actions.map((action, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                       <span className="text-gray-900">{action.description}</span>
                       <Badge className="bg-yellow-100 text-yellow-800">
@@ -241,7 +261,7 @@ export function Admin() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {dashboardData?.recent_activity?.slice(0, 5).map((activity, index) => (
+                {state.dashboardData?.recent_activity?.slice(0, 5).map((activity, index) => (
                   <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg">
                     <div className={`p-2 rounded-full ${
                       activity.type === 'donation' ? 'bg-green-100' : 'bg-blue-100'
@@ -280,55 +300,52 @@ export function Admin() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleCreateRaffle} className="space-y-4">
+              <form onSubmit={handleCreateRaffle} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="raffle-title">Título *</Label>
-                    <Input
-                      id="raffle-title"
-                      value={newRaffle.title}
-                      onChange={(e) => setNewRaffle({...newRaffle, title: e.target.value})}
-                      placeholder="Nome da rifa"
-                      required
-                    />
-                  </div>
+                  <ValidatedInput
+                    id="raffle-title"
+                    label="Título da Rifa"
+                    value={newRaffle.title}
+                    onChange={(e) => setRaffleValue('title', e.target.value)}
+                    onValidation={(isValid, errors) => setValidation('title', isValid, errors)}
+                    placeholder="Nome da rifa"
+                    validation={['required']}
+                    required
+                  />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="raffle-price">Preço por Número *</Label>
-                    <Input
-                      id="raffle-price"
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      value={newRaffle.ticket_price}
-                      onChange={(e) => setNewRaffle({...newRaffle, ticket_price: e.target.value})}
-                      placeholder="10.00"
-                      required
-                    />
-                  </div>
+                  <ValidatedInput
+                    id="raffle-price"
+                    label="Preço por Número"
+                    value={newRaffle.ticket_price}
+                    onChange={(e) => setRaffleValue('ticket_price', e.target.value)}
+                    onValidation={(isValid, errors) => setValidation('ticket_price', isValid, errors)}
+                    placeholder="10.00"
+                    mask="currency"
+                    validation={['required', 'currency']}
+                    required
+                  />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="raffle-numbers">Total de Números *</Label>
-                    <Input
-                      id="raffle-numbers"
-                      type="number"
-                      min="1"
-                      value={newRaffle.total_numbers}
-                      onChange={(e) => setNewRaffle({...newRaffle, total_numbers: e.target.value})}
-                      placeholder="100"
-                      required
-                    />
-                  </div>
+                  <ValidatedInput
+                    id="raffle-numbers"
+                    label="Total de Números"
+                    type="number"
+                    value={newRaffle.total_numbers}
+                    onChange={(e) => setRaffleValue('total_numbers', e.target.value)}
+                    onValidation={(isValid, errors) => setValidation('total_numbers', isValid, errors)}
+                    placeholder="100"
+                    min="1"
+                    validation={['required']}
+                    required
+                  />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="raffle-date">Data do Sorteio</Label>
-                    <Input
-                      id="raffle-date"
-                      type="date"
-                      value={newRaffle.draw_date}
-                      onChange={(e) => setNewRaffle({...newRaffle, draw_date: e.target.value})}
-                    />
-                  </div>
+                  <ValidatedInput
+                    id="raffle-date"
+                    label="Data do Sorteio"
+                    type="date"
+                    value={newRaffle.draw_date}
+                    onChange={(e) => setRaffleValue('draw_date', e.target.value)}
+                    onValidation={(isValid, errors) => setValidation('draw_date', isValid, errors)}
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -336,9 +353,18 @@ export function Admin() {
                   <Textarea
                     id="raffle-description"
                     value={newRaffle.description}
-                    onChange={(e) => setNewRaffle({...newRaffle, description: e.target.value})}
+                    onChange={(e) => setRaffleValue('description', e.target.value)}
                     placeholder="Descreva o prêmio e detalhes da rifa"
                     rows={3}
+                  />
+                </div>
+
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label>Imagem da Rifa</Label>
+                  <ImageUpload
+                    onImageUploaded={handleImageUploaded}
+                    currentImage={newRaffle.image_url}
                   />
                 </div>
 
@@ -353,7 +379,7 @@ export function Admin() {
                 <Button 
                   type="submit" 
                   className="bg-orange-600 hover:bg-orange-700"
-                  disabled={creatingRaffle}
+                  disabled={creatingRaffle || !isFormValid}
                 >
                   {creatingRaffle ? 'Criando...' : (
                     <>
@@ -362,6 +388,15 @@ export function Admin() {
                     </>
                   )}
                 </Button>
+                
+                {!isFormValid && Object.keys(validations).length > 0 && (
+                  <Alert className="border-yellow-200 bg-yellow-50">
+                    <AlertCircle className="h-4 w-4 text-yellow-600" />
+                    <AlertDescription className="text-yellow-800">
+                      Por favor, corrija os erros no formulário antes de continuar
+                    </AlertDescription>
+                  </Alert>
+                )}
               </form>
             </CardContent>
           </Card>
@@ -416,7 +451,7 @@ export function Admin() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {donations.slice(0, 10).map((donation) => (
+                {state.donations?.slice(0, 10).map((donation) => (
                   <div key={donation.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900">{donation.donor_name}</h3>
@@ -462,7 +497,7 @@ export function Admin() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {messages.map((message) => (
+                {state.contactMessages?.map((message) => (
                   <div key={message.id} className="p-4 border rounded-lg">
                     <div className="flex items-start justify-between mb-2">
                       <div>

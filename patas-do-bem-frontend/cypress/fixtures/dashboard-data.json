@@ -1,0 +1,86 @@
+{
+  "donations_summary": {
+    "total_amount": 15650.75,
+    "monthly_recurring": 2340.00,
+    "total_donors": 87,
+    "recurring_donors": 23,
+    "average_donation": 179.89
+  },
+  "raffles_summary": {
+    "active_raffles": 3,
+    "total_raffles": 8,
+    "total_tickets_sold": 245,
+    "total_revenue": 2450.00
+  },
+  "monthly_donations": [
+    { "month": "2024-07-01", "total_amount": 2340.50, "donation_count": 12 },
+    { "month": "2024-08-01", "total_amount": 3120.25, "donation_count": 18 },
+    { "month": "2024-09-01", "total_amount": 4890.00, "donation_count": 25 },
+    { "month": "2024-10-01", "total_amount": 3680.75, "donation_count": 19 },
+    { "month": "2024-11-01", "total_amount": 1619.25, "donation_count": 13 }
+  ],
+  "payment_methods": [
+    { "method": "pix", "count": 45, "total_amount": 8920.50 },
+    { "method": "credit_card", "count": 28, "total_amount": 4730.25 },
+    { "method": "boleto", "count": 14, "total_amount": 2000.00 }
+  ],
+  "raffles_performance": [
+    {
+      "id": 1,
+      "title": "Rifa do Smartphone",
+      "total_numbers": 100,
+      "sold_numbers": 78,
+      "revenue": 780.00
+    },
+    {
+      "id": 2,
+      "title": "Rifa da Cesta Natalina",
+      "total_numbers": 50,
+      "sold_numbers": 32,
+      "revenue": 160.00
+    },
+    {
+      "id": 3,
+      "title": "Rifa do Vale Compras",
+      "total_numbers": 200,
+      "sold_numbers": 135,
+      "revenue": 1350.00
+    }
+  ],
+  "donation_trends": [
+    { "date": "2024-11-01", "amount": 150.00, "cumulative_amount": 15200.75 },
+    { "date": "2024-11-02", "amount": 75.00, "cumulative_amount": 15275.75 },
+    { "date": "2024-11-03", "amount": 200.00, "cumulative_amount": 15475.75 },
+    { "date": "2024-11-04", "amount": 50.00, "cumulative_amount": 15525.75 },
+    { "date": "2024-11-05", "amount": 125.00, "cumulative_amount": 15650.75 }
+  ],
+  "pending_actions": [
+    {
+      "type": "pending_payments",
+      "description": "Pagamentos pendentes de confirmação",
+      "count": 3
+    },
+    {
+      "type": "new_messages",
+      "description": "Novas mensagens de contato",
+      "count": 5
+    }
+  ],
+  "recent_activity": [
+    {
+      "type": "donation",
+      "description": "Nova doação de R$ 150,00 via PIX",
+      "date": "2024-11-05T10:30:00Z"
+    },
+    {
+      "type": "message", 
+      "description": "Nova mensagem de contato recebida",
+      "date": "2024-11-05T09:15:00Z"
+    },
+    {
+      "type": "donation",
+      "description": "Doação recorrente de R$ 50,00 processada",
+      "date": "2024-11-04T14:20:00Z"
+    }
+  ]
+}
