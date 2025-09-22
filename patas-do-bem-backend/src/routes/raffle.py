@@ -33,7 +33,9 @@ def list_raffles():
 def get_raffle(raffle_id):
     """Detalhes de uma rifa específica"""
     try:
-        raffle = Raffle.query.get_or_404(raffle_id)
+        raffle = Raffle.query.get(raffle_id)
+        if not raffle:
+            return jsonify({'error': 'Rifa não encontrada'}), 404
         
         # Números vendidos
         sold_tickets = RaffleTicket.query.filter(

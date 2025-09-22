@@ -6,6 +6,8 @@ from src.models.user import db
 from src.models.donation import Donation
 from src.models.raffle import Raffle, RaffleTicket
 from src.models.contact import ContactMessage
+from src.models.admin import Admin
+from src.services.auth_service import auth_service
 
 @pytest.fixture
 def client():
@@ -85,8 +87,32 @@ def create_sample_raffle(client, sample_raffle_data):
     raffle_data = sample_raffle_data.copy()
     raffle_data['draw_date'] = datetime.strptime(raffle_data['draw_date'], '%Y-%m-%d').date()
     raffle_data['created_by'] = 1
-    
+
     raffle = Raffle(**raffle_data)
     db.session.add(raffle)
     db.session.commit()
     return raffle
+
+@pytest.fixture
+def admin_user():
+    """Cria um usuário admin para testes"""
+    admin = Admin(
+        username='admin_test',
+        email='admin@test.com',
+        role='admin',
+        is_active=True
+    )
+    admin.set_password('admin123')
+    db.session.add(admin)
+    db.session.commit()
+    return admin
+
+@pytest.fixture
+def admin_token(admin_user):
+    """Gera token de autenticação para admin"""
+    return auth_service.generate_token(admin_user)
+
+@pytest.fixture
+def auth_headers(admin_token):
+    """Headers de autenticação para requisições"""
+    return {'Authorization': f'Bearer {admin_token}'}

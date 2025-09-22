@@ -17,7 +17,8 @@
       "Bash(timeout 90s npx cypress run:*)",
       "Bash(pip install:*)",
       "Bash(find:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

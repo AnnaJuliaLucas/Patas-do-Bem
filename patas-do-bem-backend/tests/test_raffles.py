@@ -45,57 +45,61 @@ class TestRafflesAPI:
         
         assert response.status_code == 404
     
-    def test_create_raffle(self, client, sample_raffle_data):
+    def test_create_raffle(self, client, sample_raffle_data, auth_headers):
         """Teste de criação de rifa"""
         response = client.post('/api/raffles',
                              data=json.dumps(sample_raffle_data),
-                             content_type='application/json')
-        
+                             content_type='application/json',
+                             headers=auth_headers)
+
         assert response.status_code == 201
         data = json.loads(response.data)
         assert 'raffle' in data
         assert data['raffle']['title'] == sample_raffle_data['title']
         assert data['raffle']['status'] == 'active'
     
-    def test_create_raffle_missing_fields(self, client):
+    def test_create_raffle_missing_fields(self, client, auth_headers):
         """Teste de criação de rifa com campos obrigatórios faltando"""
         incomplete_data = {'title': 'Rifa Teste'}
-        
+
         response = client.post('/api/raffles',
                              data=json.dumps(incomplete_data),
-                             content_type='application/json')
-        
+                             content_type='application/json',
+                             headers=auth_headers)
+
         assert response.status_code == 400
         data = json.loads(response.data)
         assert 'error' in data
     
-    def test_update_raffle(self, client, create_sample_raffle):
+    def test_update_raffle(self, client, create_sample_raffle, auth_headers):
         """Teste de atualização de rifa"""
         raffle = create_sample_raffle
-        
+
         update_data = {
             'title': 'Rifa Atualizada',
             'description': 'Nova descrição'
         }
-        
+
         response = client.put(f'/api/raffles/{raffle.id}',
                             data=json.dumps(update_data),
-                            content_type='application/json')
-        
+                            content_type='application/json',
+                            headers=auth_headers)
+
         assert response.status_code == 200
         data = json.loads(response.data)
         assert data['raffle']['title'] == 'Rifa Atualizada'
     
-    def test_cancel_raffle_without_tickets(self, client, create_sample_raffle):
+    def test_cancel_raffle_without_tickets(self, client, create_sample_raffle, auth_headers):
         """Teste de cancelamento de rifa sem números vendidos"""
         raffle = create_sample_raffle
-        
-        response = client.delete(f'/api/raffles/{raffle.id}')
-        
+
+        response = client.delete(f'/api/raffles/{raffle.id}',
+                                headers=auth_headers)
+
         assert response.status_code == 200
         data = json.loads(response.data)
         assert 'message' in data
-        
+
         # Verificar se foi cancelada
         from src.models.user import db
         db.session.refresh(raffle)
@@ -227,15 +231,15 @@ class TestRafflesAPI:
         assert 'tickets' in data
         assert len(data['tickets']) == len(sample_ticket_data['selected_numbers'])
     
-    def test_draw_raffle(self, client, create_sample_raffle, sample_ticket_data):
+    def test_draw_raffle(self, client, create_sample_raffle, sample_ticket_data, auth_headers):
         """Teste de sorteio da rifa"""
         raffle = create_sample_raffle
-        
+
         # Primeiro comprar e confirmar tickets
         client.post(f'/api/raffles/{raffle.id}/tickets',
                    data=json.dumps(sample_ticket_data),
                    content_type='application/json')
-        
+
         confirmation_data = {
             'ticket_numbers': sample_ticket_data['selected_numbers'],
             'status': 'completed'
@@ -243,35 +247,37 @@ class TestRafflesAPI:
         client.post(f'/api/raffles/{raffle.id}/tickets/confirm',
                    data=json.dumps(confirmation_data),
                    content_type='application/json')
-        
+
         # Realizar sorteio
-        response = client.post(f'/api/raffles/{raffle.id}/draw')
-        
+        response = client.post(f'/api/raffles/{raffle.id}/draw',
+                              headers=auth_headers)
+
         assert response.status_code == 200
         data = json.loads(response.data)
         assert 'winner' in data
         assert 'number' in data['winner']
         assert data['winner']['number'] in sample_ticket_data['selected_numbers']
     
-    def test_draw_raffle_without_tickets(self, client, create_sample_raffle):
+    def test_draw_raffle_without_tickets(self, client, create_sample_raffle, auth_headers):
         """Teste de sorteio sem números vendidos"""
         raffle = create_sample_raffle
-        
-        response = client.post(f'/api/raffles/{raffle.id}/draw')
-        
+
+        response = client.post(f'/api/raffles/{raffle.id}/draw',
+                              headers=auth_headers)
+
         assert response.status_code == 400
         data = json.loads(response.data)
         assert 'error' in data
     
-    def test_get_raffle_winners(self, client, create_sample_raffle, sample_ticket_data):
+    def test_get_raffle_winners(self, client, create_sample_raffle, sample_ticket_data, auth_headers):
         """Teste de obtenção dos ganhadores"""
         raffle = create_sample_raffle
-        
+
         # Comprar, confirmar e sortear
         client.post(f'/api/raffles/{raffle.id}/tickets',
                    data=json.dumps(sample_ticket_data),
                    content_type='application/json')
-        
+
         confirmation_data = {
             'ticket_numbers': sample_ticket_data['selected_numbers'],
             'status': 'completed'
@@ -279,12 +285,14 @@ class TestRafflesAPI:
         client.post(f'/api/raffles/{raffle.id}/tickets/confirm',
                    data=json.dumps(confirmation_data),
                    content_type='application/json')
-        
-        client.post(f'/api/raffles/{raffle.id}/draw')
-        
+
+        client.post(f'/api/raffles/{raffle.id}/draw',
+                   headers=auth_headers)
+
         # Obter ganhadores
-        response = client.get(f'/api/raffles/{raffle.id}/winners')
-        
+        response = client.get(f'/api/raffles/{raffle.id}/winners',
+                             headers=auth_headers)
+
         assert response.status_code == 200
         data = json.loads(response.data)
         assert 'winner' in data
