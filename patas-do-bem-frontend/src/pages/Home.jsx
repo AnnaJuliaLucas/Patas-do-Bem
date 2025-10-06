@@ -338,7 +338,7 @@ export function Home() {
                   </>
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-white text-white hover:bg-white hover:text-orange-600">
+              <Button size="lg" asChild className="bg-white text-orange-600 hover:bg-gray-100">
                 <Link to="/rifas">
                   <>
                     <Gift className="h-5 w-5 mr-2" />

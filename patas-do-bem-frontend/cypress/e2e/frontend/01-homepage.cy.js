@@ -264,6 +264,7 @@ describe('Homepage E2E Tests', () => {
       
       cy.contains('Participar de Rifas').click()
       cy.url().should('include', '/rifas')
+      cy.go('back')
     })
   })
 
